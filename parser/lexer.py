@@ -76,6 +76,9 @@ class Lexer:
             self._peeked_token = self.next()
         return self._peeked_token
 
+    def reset(self):
+        self._position = 0
+
 
 class ParsingException(Exception):
     pass
