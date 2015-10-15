@@ -53,13 +53,13 @@ class Lexer:
 
     def _action_and_advance(self, func):
         token = func()
-        self._position += 1
+        self._position += len(token.token_value)
         self._peeked_token = None
         return token
 
     def _advance_to_non_whitespace(self):
         while (self._position < len(self._json_string)
-                and self._json_string[self._position: self._position+1].isspace()):
+                and self._json_string[self._position].isspace()):
             self._position += 1
 
     def _try_parse_number(self):
@@ -67,7 +67,34 @@ class Lexer:
 
     # Read until next unescaped double quote
     def _try_parse_string(self):
-        raise NotImplementedError
+        curr_pos = self._position + 1
+        found_closing_quote = False
+        even_num_successive_escape_chars = True
+
+        while curr_pos < len(self._json_string):
+            curr_char = self._json_string[curr_pos]
+            if curr_char == '"' and even_num_successive_escape_chars:
+                found_closing_quote = True
+            elif curr_char == '\\':
+                even_num_successive_escape_chars = not even_num_successive_escape_chars
+            else:
+                even_num_successive_escape_chars = True
+
+            curr_pos += 1
+
+        if not found_closing_quote:
+           raise ParsingException(
+               'Closing \'"\' not found for string token at position {}.'.format(
+                   self._position,
+               ),
+           )
+
+        return Token(
+            token_type=TokenType.STRING,
+            token_value=self._json_string[self._position:curr_pos],
+            token_position=self._position,
+        )
+
 
     def _try_parse_value(self, token):
         if self._json_string[self._position:].startswith(token.token_value):
@@ -77,7 +104,7 @@ class Lexer:
             'Invalid token at position {}. Expected "{}".'.format(
                 self._position,
                 token.token_value,
-            )
+            ),
         )
 
 
