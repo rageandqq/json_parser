@@ -29,13 +29,13 @@ class Lexer:
             't': lambda: self._try_parse_value(Token(TokenType.TRUE, 'true', self._position)),
             'f': lambda: self._try_parse_value(Token(TokenType.FALSE, 'false', self._position)),
             'n': lambda: self._try_parse_value(Token(TokenType.NULL, 'null', self._position)),
-            '"': lambda: self._try_parse_string(),
             '{': lambda: Token(TokenType.START_OBJECT, '{', self._position),
             '}': lambda: Token(TokenType.END_OBJECT, '}', self._position),
             '[': lambda: Token(TokenType.START_ARRAY, '[', self._position),
             ']': lambda: Token(TokenType.END_ARRAY, ']', self._position),
             ':': lambda: Token(TokenType.COLON, ':', self._position),
             ',': lambda: Token(TokenType.COMMA, ',', self._position),
+            '"': self._try_parse_string,
         }
 
         token_action = token_action_mapper.get(self._json_string[self._position], self._try_parse_number)
@@ -92,14 +92,16 @@ class Lexer:
 
         while curr_pos < len(self._json_string):
             curr_char = self._json_string[curr_pos]
+            curr_pos += 1
+
             if curr_char == '"' and even_num_successive_escape_chars:
                 found_closing_quote = True
+                break
             elif curr_char == '\\':
                 even_num_successive_escape_chars = not even_num_successive_escape_chars
             else:
                 even_num_successive_escape_chars = True
 
-            curr_pos += 1
 
         if not found_closing_quote:
            raise ParsingException(
