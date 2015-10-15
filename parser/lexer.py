@@ -42,8 +42,11 @@ class Lexer:
         return self._action_and_advance(token_action)
 
     def peek(self):
+        self._advance_to_non_whitespace()
+        saved_position = self._position
         if not self._peeked_token:
             self._peeked_token = self.next()
+            self._position = saved_position
         return self._peeked_token
 
     def reset(self):
@@ -57,7 +60,6 @@ class Lexer:
     def _action_and_advance(self, func):
         token = func()
         self._position += len(token.token_value)
-        self._peeked_token = None
         return token
 
     def _advance_to_non_whitespace(self):
@@ -66,9 +68,23 @@ class Lexer:
             self._position += 1
 
     def _try_parse_number(self):
-        raise NotImplementedError
+        number_regex = r"-?\d*\.?\d+(?:[Ee][+-]?\d+)?"
+        number_match = re.match(number_regex, self._json_string[self._position:])
 
-    # Read until next unescaped double quote
+        if number_match is None:
+           raise ParsingException(
+               'Failed to parse valid NUMBER token at position {}.'.format(
+                   self._position,
+               ),
+           )
+
+        end_pos = self._position + len(number_match.group())
+        return Token(
+            token_type=TokenType.NUMBER,
+            token_value=self._json_string[self._position:end_pos],
+            token_position=self._position,
+        )
+
     def _try_parse_string(self):
         curr_pos = self._position + 1
         found_closing_quote = False
@@ -87,7 +103,7 @@ class Lexer:
 
         if not found_closing_quote:
            raise ParsingException(
-               'Closing \'"\' not found for string token at position {}.'.format(
+               'Closing \'"\' not found for STRING token at position {}.'.format(
                    self._position,
                ),
            )
