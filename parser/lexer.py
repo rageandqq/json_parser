@@ -10,10 +10,13 @@ class Lexer:
     _peeked_token = None
     _position = None
 
+    def has_next(self):
+        return self.peek().token_type != TokenType.EOF
+
     def next(self):
         peeked_token = self._peeked_token
         if peeked_token:
-            self._position += len(peeked_token)
+            self._position += len(peeked_token.token_value)
             self._peeked_token = None
             return peeked_token
 
