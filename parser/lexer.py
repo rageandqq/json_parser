@@ -1,8 +1,10 @@
+import re
+
 from tokens import Token
 from tokens import TokenType
 
 
-class Tokenizer:
+class Lexer:
 
     json_string = None
     peeked_token = None
@@ -22,7 +24,6 @@ class Tokenizer:
         while self.position < len(self.json_string) and self.json_string[self.position: self.position+1].isspace():
             self.position += 1
 
-    # Accept a number (with decimals) with an optional +/- sign in front of it
     def _try_parse_number(self):
         raise NotImplementedError
 
