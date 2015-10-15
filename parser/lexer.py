@@ -21,7 +21,8 @@ class Lexer:
         return token
 
     def _advance_to_non_whitespace(self):
-        while self.position < len(self.json_string) and self.json_string[self.position: self.position+1].isspace():
+        while (self.position < len(self.json_string)
+                and self.json_string[self.position: self.position+1].isspace()):
             self.position += 1
 
     def _try_parse_number(self):
