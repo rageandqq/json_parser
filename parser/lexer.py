@@ -10,39 +10,6 @@ class Lexer:
     _peeked_token = None
     _position = None
 
-    def __init__(self, json_string):
-        self._json_string = json_string
-        self._position = 0
-
-    def _action_and_advance(self, func):
-        token = func()
-        self._position += 1
-        self._peeked_token = None
-        return token
-
-    def _advance_to_non_whitespace(self):
-        while (self._position < len(self._json_string)
-                and self._json_string[self._position: self._position+1].isspace()):
-            self._position += 1
-
-    def _try_parse_number(self):
-        raise NotImplementedError
-
-    # Read until next unescaped double quote
-    def _try_parse_string(self):
-        raise NotImplementedError
-
-    def _try_parse_value(self, token):
-        if self._json_string[self._position:].startswith(token.token_value):
-            self._position += len(token.token_value)
-            return token
-        raise ParsingException(
-            'Invalid token at position {}. Expected "{}".'.format(
-                self._position,
-                token.token_value,
-            )
-        )
-
     def next(self):
         peeked_token = self._peeked_token
         if peeked_token:
@@ -78,6 +45,39 @@ class Lexer:
 
     def reset(self):
         self._position = 0
+
+    def __init__(self, json_string):
+        self._json_string = json_string
+        self._position = 0
+
+    def _action_and_advance(self, func):
+        token = func()
+        self._position += 1
+        self._peeked_token = None
+        return token
+
+    def _advance_to_non_whitespace(self):
+        while (self._position < len(self._json_string)
+                and self._json_string[self._position: self._position+1].isspace()):
+            self._position += 1
+
+    def _try_parse_number(self):
+        raise NotImplementedError
+
+    # Read until next unescaped double quote
+    def _try_parse_string(self):
+        raise NotImplementedError
+
+    def _try_parse_value(self, token):
+        if self._json_string[self._position:].startswith(token.token_value):
+            self._position += len(token.token_value)
+            return token
+        raise ParsingException(
+            'Invalid token at position {}. Expected "{}".'.format(
+                self._position,
+                token.token_value,
+            )
+        )
 
 
 class ParsingException(Exception):
