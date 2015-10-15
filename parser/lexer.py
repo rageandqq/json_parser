@@ -44,11 +44,12 @@ class Lexer:
         return self._peeked_token
 
     def reset(self):
+        self._peeked_token = None
         self._position = 0
 
     def __init__(self, json_string):
         self._json_string = json_string
-        self._position = 0
+        self.reset()
 
     def _action_and_advance(self, func):
         token = func()
