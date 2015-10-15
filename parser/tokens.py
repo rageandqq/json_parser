@@ -1,6 +1,9 @@
 # This file defines all the tokens used by the JSON parser.
 from enum import Enum
 
+from parser import EqualityMixin
+
+
 class InvalidTokenFormatError:
     PARAM_NAME = None
     EXPECTED_TYPE = None
@@ -9,28 +12,30 @@ class InvalidTokenFormatError:
         self.PARAM_NAME = param_name
         self.EXPECTED_TYPE = expected_type
 
+
 class TokenType(Enum):
     EOF = 1
 
-    true = 2
-    false = 3
+    TRUE = 2
+    FALSE = 3
 
-    colon = 4
-    comma = 5
+    COLON = 4
+    COMMA = 5
 
-    start_object = 6
-    end_object = 7
+    START_OBJECT = 6
+    END_OBJECT = 7
 
-    start_array = 8
-    end_array = 9
+    START_ARRAY = 8
+    END_ARRAY = 9
 
-    null = 10
-    number = 11
-    string = 12
+    NULL = 10
+    NUMBER = 11
+    STRING = 12
 
-    other = 13
+    OTHER = 13
 
-class Token:
+
+class Token(EqualityMixin):
 
     def __init__(self, token_type, token_value, token_position):
         try:
@@ -47,3 +52,10 @@ class Token:
             self.token_position = token_position
         except InvalidTokenFormatError as err:
             raise TypeError('"{}" must be of type "{}"!', err.PARAM_NAME, err.EXPECTED_TYPE)
+
+    def __eq__(self, obj):
+        return (
+            self.token_type == token.token_type
+            and self.token_value == token.token_value
+            and self.token_position == token.token_position
+        )
