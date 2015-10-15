@@ -34,16 +34,21 @@ class Tokenizer:
         if self.json_string[self.position:].startswith(token.token_value):
             self.position += len(token.token_value)
             return token
-        raise ParsingException('Invalid token at position {}. Expected "{}".'.format(self.position, token.token_value))
+        raise ParsingException(
+            'Invalid token at position {}. Expected "{}".'.format(
+                self.position,
+                token.token_value,
+            )
+        )
 
     def next(self):
-        self._advance_to_non_whitespace()
-
         peeked_token = self.peeked_token
         if peeked_token:
             self.position += len(peeked_token)
             self.peeked_token = None
             return peeked_token
+
+        self._advance_to_non_whitespace()
 
         if self.position >= len(self.json_string):
             return Token(TokenType.EOF, '', self.position)
@@ -65,10 +70,8 @@ class Tokenizer:
         return self._action_and_advance(token_action)
 
     def peek(self):
-        saved_position = self.position
         if not self.peeked_token:
             self.peeked_token = self.next()
-            self.position = saved_position
         return self.peeked_token
 
 
